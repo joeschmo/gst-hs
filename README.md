@@ -12,23 +12,17 @@ For a technical understanding of the semantics of Godel's System T, read Chapter
 
 Godel's System T only has two types: nat and function. There are only a couple expressions available:
 
-The natural number zero:
-    z
+The natural number zero: `z`
 
-The successor "function":
-    s(e)
+The successor "function": `s(e)`
 
-Variables:
-    x, y, z, var, hello, ...
+Variables: `x`, `y`, `z`, `var`, `hello`, ...
 
-Lambda abstraction:
-    fn (x : t) e
+Lambda abstraction: `fn (x : t) e`
 
-Primitive recursion:
-    natrec e {z => e0 | s(x) with y => e1}
+Primitive recursion: `natrec e {z => e0 | s(x) with y => e1}`
 
-Function application:
-    e(e')
+Function application: `e(e')`
 
 **ToDo**
 
