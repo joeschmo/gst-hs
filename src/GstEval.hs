@@ -1,10 +1,12 @@
-module GstEval (evalWith, rebindVar) where
+module GstEval where
+
 import Control.Monad.Error
+import GstError
 import GstTypes
 
 -- STATICS
 
-typeof :: (Monad m) => Ctx -> Exp -> m Typ
+typeof :: Ctx -> Exp -> ThrowsError Typ
 typeof cx ex =
     case ex of
          Z -> return Nat
@@ -12,10 +14,10 @@ typeof cx ex =
             typeof cx e >>= (\t ->
                 case t of
                      Nat -> return Nat
-                     _   -> fail "mismatched type for S")
+                     _   -> throwError $ TypeMismatch Nat t ex)
          X v ->
             case lookup v cx of
-                 Nothing -> fail $ "unbound variable "++v
+                 Nothing -> fail $ "unbound variable " ++ v
                  Just t  -> return t
          Lam t v e ->
             let
@@ -26,7 +28,7 @@ typeof cx ex =
             do
                 et <- typeof cx e
                 case et == Nat of
-                     False -> fail "recursion expression type not Nat"
+                     False -> throwError $ TypeMismatch Nat et e
                      True  ->
                         typeof cx e0 >>= (\t ->
                             let
@@ -40,8 +42,8 @@ typeof cx ex =
                      Arr t2 t ->
                         typeof cx e2 >>= (\t0 ->
                             if t0 == t2 then return t
-                            else fail $ "Illegal argument type "++(show t2)++" instead of "++(show t0))
-                     _ -> fail "Not applying a function"
+                            else throwError $ TypeMismatch t2 t0 e2)
+                     _ -> throwError $ Default "Application expected a function"
 
 -- DYNAMICS
 
@@ -80,14 +82,13 @@ rebindVar v ex r =
                          False ->
                             Natrec (rebindVar v e r) (rebindVar v e0 r) x y (rebindVar v e1 r)
 
-
-eval :: (Monad m) => Exp -> m Exp
+eval :: Exp -> ThrowsError Exp
 eval ex =
     case ex of
          Z -> return Z
          S e -> eval e >>= (\e' -> return $ S e')
-         X v -> fail $ "Unbound variable "++v
-         Lam t v e -> return $ Lam t v e
+         X v -> throwError $ UnboundVar "Unbound Variable" v
+         Lam t v e -> return ex
          Ap e1 e2 ->
             do
                 e1' <- eval e1
@@ -97,7 +98,7 @@ eval ex =
                             e' = rebindVar v e e2
                         in
                             eval e'
-                     _ -> fail "expression is not a function"
+                     _ -> throwError $ Default "Application expected a function"
          Natrec e e0 x y e1 ->
             do
                 e' <- eval e
@@ -109,14 +110,13 @@ eval ex =
                             repY = rebindVar y repX (Natrec ep e0 x y e1)
                         in
                             eval repY
-                     _ -> fail "recursion variable is not of type Nat"
+                     _ -> typeof emptyCtx e' >>= (\t -> throwError $ TypeMismatch Nat t e')
 
 evalWith :: Exp -> IO ()
-evalWith e =
-    case typeof emptyCtx e of
-         Left msg -> putStrLn msg
-         Right _ ->
-            case eval e of
-                 Left msg -> putStrLn msg
-                 Right v -> putStrLn (show v)
-
+evalWith ex =
+    case typeof emptyCtx ex of
+         Left err -> putStrLn $ show err
+         Right t  ->
+            case eval ex of
+                 Left err' -> putStrLn $ show err'
+                 Right e   -> putStrLn $ show e ++ " : " ++ show t

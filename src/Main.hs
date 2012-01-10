@@ -9,12 +9,13 @@ import Data.IORef
 import GstParser
 import GstEval
 import GstTypes
+import GstError
 
 parseAndEval :: String -> IO ()
 parseAndEval exp =
     case readExp exp of
          Left err -> putStrLn $ "syntax error: " ++ show err
-         Right e -> evalWith e
+         Right e -> evalWith e 
 
 flushStr str = putStr str >> hFlush stdout
 
