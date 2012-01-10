@@ -9,6 +9,7 @@ For a technical understanding of the semantics of Godel's System T, read Chapter
 [Bob Harper's book](www.cs.cmu.edu/~rwh/plbook/book.pdf).
 
 **Syntax**
+
 Godel's System T only has two types: nat and function. There are only a couple expressions available:
 
 The natural number zero:
@@ -30,6 +31,9 @@ Function application:
     e(e')
 
 **ToDo**
+
 - Refactor error handling in GstEval.hs to use MonadError
+
 - Implement a global variable environment using Data.IORef
+
 - Implement File IO to allow the loading of *.gst files into the interpreter
