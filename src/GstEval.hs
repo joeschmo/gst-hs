@@ -4,7 +4,7 @@ import GstTypes
 
 -- STATICS
 
-typeof :: Ctx -> Exp -> IO Typ
+typeof :: (Monad m) => Ctx -> Exp -> m Typ
 typeof cx ex =
     case ex of
          Z -> return Nat
@@ -81,7 +81,7 @@ rebindVar v ex r =
                             Natrec (rebindVar v e r) (rebindVar v e0 r) x y (rebindVar v e1 r)
 
 
-eval :: Exp -> IO Exp
+eval :: (Monad m) => Exp -> m Typ
 eval ex =
     case ex of
          Z -> return Z
