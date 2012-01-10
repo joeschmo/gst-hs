@@ -24,6 +24,17 @@ Primitive recursion: `natrec e {z => e0 | s(x) with y => e1}`
 
 Function application: `e(e')`
 
+## Compiling
+
+These instructions are for the linux and OS X operating systems. Go to [www.haskell.org](www.haskell.org)
+to find instructions about compiling haskell programs on Windows.
+
+Compiling requires the installation of [GHC](www.haskell.org/ghc/).
+
+To compile, use the command `ghc --make Main.hs`. If GHC complains about the ambiguity
+of Control.Monad.Error, then use the command `ghc --make -hide-package monads-fd Main.hs`.
+
+
 ## ToDo
 
 - Refactor error handling in GstEval.hs to use MonadError
