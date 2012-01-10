@@ -5,17 +5,13 @@ import System.Exit
 import System.IO
 
 import Data.IORef
+import Control.Monad
 
 import GstParser
 import GstEval
 import GstTypes
 import GstError
 
-parseAndEval :: String -> IO ()
-parseAndEval exp =
-    case readExp exp of
-         Left err -> putStrLn $ "syntax error: " ++ show err
-         Right e -> evalWith e 
 
 flushStr str = putStr str >> hFlush stdout
 
@@ -31,9 +27,20 @@ until_ prompt action = do
                                  action line
     until_ prompt action
 
-runRepl = until_ (readPrompt "gst>>> ") parseAndEval
+runRepl = until_ (readPrompt "gst>>> ") evalAndPrint
 
-readPrompt prompt = hFlush stderr >> hFlush stdout >> readline prompt
+readPrompt prompt = hFlush stdout >> readline prompt
+
+evalString :: String -> IO String
+evalString expr = return $ extractVal $ trapError 
+    (do
+        exp <- readExp expr
+        t <- typeof emptyCtx exp
+        e <- eval exp
+        return $ (show e) ++ " : " ++ (show t))
+
+evalAndPrint :: String -> IO ()
+evalAndPrint expr = evalString expr >>= putStrLn
 
 main :: IO ()
 main = runRepl

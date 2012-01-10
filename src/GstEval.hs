@@ -17,7 +17,7 @@ typeof cx ex =
                      _   -> throwError $ TypeMismatch Nat t ex)
          X v ->
             case lookup v cx of
-                 Nothing -> fail $ "unbound variable " ++ v
+                 Nothing -> throwError $ UnboundVar "Unbound variable " v
                  Just t  -> return t
          Lam t v e ->
             let

@@ -1,5 +1,7 @@
 module GstParser (parseTyp, parseExp, readExp) where
 import GstTypes
+import GstError
+import Control.Monad.Error
 import Text.ParserCombinators.Parsec
 import Data.Char
 
@@ -32,6 +34,11 @@ parseParenT = do
     return t
 
 -- Expression parser
+
+readExp :: String -> ThrowsError Exp
+readExp input = case parse parseExp "gst" input of
+    Left err -> throwError $ Parser err
+    Right exp -> return exp
 
 parseExpr = try parseZ
     <|> try parseS
@@ -125,4 +132,3 @@ parseNatrec = do
     char '}'
     return $ Natrec e e0 x y e1
 
-readExp exp = parse parseExp "gst" exp
