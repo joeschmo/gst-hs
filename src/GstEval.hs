@@ -90,7 +90,7 @@ eval env ex =
     case ex of
          Z -> return Z
          S e -> eval env e >>= (\e' -> return $ S e')
-         X v -> getVar env v 
+         X v -> getVar env v
          Lam t v e -> return ex
          Ap e1 e2 ->
             do

@@ -33,7 +33,8 @@ runRepl = nullEnv >>= until_ (readPrompt "gst>>> ") . evalAndPrint
 readPrompt prompt = hFlush stdout >> readline prompt
 
 evalString :: Env -> String -> IO String
-evalString env expr = runIOThrows $ liftM show $ (liftThrows $ readExp expr) >>= eval env
+evalString env expr = runIOThrows $ liftM showRes $ (liftThrows $ readExp expr) >>= (\exp -> liftM2 (,) (eval env exp) (typeof env emptyCtx exp)) 
+    where showRes (e, t) = show e ++ " : " ++ show t
 
 evalAndPrint :: Env -> String -> IO ()
 evalAndPrint env expr = evalString env expr >>= putStrLn
