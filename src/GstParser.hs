@@ -46,8 +46,8 @@ readExpList = readOrThrow (endBy parseExp (many1 $ char '\n'))
 parseExpr = try parseS
     <|> try parseLam
     <|> try parseNatrec
+    <|> try parseParenE
     <|> try parseZ
-    <|> parseParenE
     <|> parseVar
 
 parseExp = try parseLoad <|> try parseSet <|> parseAp
@@ -65,7 +65,7 @@ parseAp :: Parser Exp
 parseAp = do 
     e1 <- parseExpr
     many sspace
-    es <- sepBy parseParenE (many sspace)
+    es <- sepEndBy parseParenE (many sspace)
     return $ foldr (\e -> (\e' -> Ap e' e)) e1 (reverse es)
 
 parseSet :: Parser Exp
@@ -81,7 +81,7 @@ parseParenE :: Parser Exp
 parseParenE = do
     char '('
     many sspace
-    e <- parseExp
+    e <- parseAp
     many sspace
     char ')'
     return e
@@ -142,7 +142,7 @@ parseNatrec = do
     many sspace
     string "=>"
     many sspace
-    e0 <- parseExp
+    e0 <- parseAp
     many sspace
     char '|'
     many sspace
@@ -156,7 +156,7 @@ parseNatrec = do
     many sspace
     string "=>"
     many sspace
-    e1 <- parseExp
+    e1 <- parseAp
     many sspace
     char '}'
     return $ Natrec e e0 x y e1
