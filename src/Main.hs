@@ -18,17 +18,19 @@ flushStr str = putStr str >> hFlush stdout
 
 flushStrLn str = putStrLn str >> hFlush stdout
 
-until_ prompt action = do
+until_ prompt pred action = do
     result <- prompt
     case result of
          Nothing -> exitSuccess
          Just line -> case line of
                         "" -> return ()
-                        _  -> do addHistory line
-                                 action line
-    until_ prompt action
+                        _  -> case pred line of
+                                   False -> do addHistory line
+                                               action line
+                                   True  -> exitSuccess
+    until_ prompt pred action
 
-runRepl = nullEnv >>= until_ (readPrompt "gst>>> ") . evalAndPrint
+runRepl = nullEnv >>= until_ (readPrompt "gst>>> ") (== "quit") . evalAndPrint
 
 readPrompt prompt = hFlush stdout >> readline prompt
 

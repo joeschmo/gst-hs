@@ -1,10 +1,13 @@
 module GstEval where
 
 import Control.Monad.Error
+import Control.Monad
+import System.IO
 
 import GstError
 import GstTypes
 import GstEnv
+import GstParser
 
 -- STATICS
 
@@ -47,6 +50,7 @@ typeof env cx ex =
                             else throwError $ TypeMismatch t2 t0 e2)
                      _ -> throwError $ Default "Application expected a function"
          Set v e -> typeof env cx e
+         Load _ -> return Nat
 
 -- DYNAMICS
 
@@ -85,6 +89,11 @@ rebindVar v ex r =
                          False ->
                             Natrec (rebindVar v e r) (rebindVar v e0 r) x y (rebindVar v e1 r)
 
+-- IO Helper functions
+
+load :: String -> IOThrowsError [Exp]
+load filename = (liftIO $ readFile filename) >>= liftThrows . readExpList
+
 eval :: Env -> Exp -> IOThrowsError Exp
 eval env ex =
     case ex of
@@ -118,13 +127,4 @@ eval env ex =
             e' <- eval env e
             defineVar env v e'
             return $ Set v e'
-
-{-
-evalWith :: Exp -> IO ()
-evalWith ex =
-    case typeof emptyCtx ex of
-         Left err -> putStrLn $ show err
-         Right t  ->
-            case eval ex of
-                 Left err' -> putStrLn $ show err'
-                 Right e   -> putStrLn $ show e ++ " : " ++ show t -}
+         Load f -> load f >>= liftM last . mapM (eval env)

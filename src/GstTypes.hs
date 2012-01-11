@@ -12,6 +12,7 @@ data Exp = X Var
          | Lam Typ Var Exp
          | Ap Exp Exp
          | Set Var Exp
+         | Load String
     deriving (Eq)
 
 type Ctx = [(Var, Typ)]
@@ -34,3 +35,4 @@ instance Show Exp where
     show (Lam t v e) = "fn("++v++" : "++(show t)++") "++(show e)
     show (Ap e1 e2) = (show e1)++"("++(show e2)++")"
     show (Set v e) = v++" = "++show e
+    show (Load f) = f++" loaded"

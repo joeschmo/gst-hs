@@ -34,7 +34,6 @@ Compiling requires the installation of [GHC](www.haskell.org/ghc/).
 To compile, use the command `ghc --make Main.hs`. If GHC complains about the ambiguity
 of Control.Monad.Error, then use the command `ghc --make -hide-package monads-fd Main.hs`.
 
-
 ## ToDo
 
-- Implement File IO to allow the loading of *.gst files into the interpreter
+- Write a basic introduction to using the interpreter

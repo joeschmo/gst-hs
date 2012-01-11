@@ -1,4 +1,4 @@
-module GstParser (parseTyp, parseExp, readExp) where
+module GstParser (parseTyp, parseExp, readExp, readExpList) where
 import GstTypes
 import GstError
 import Control.Monad.Error
@@ -35,10 +35,13 @@ parseParenT = do
 
 -- Expression parser
 
-readExp :: String -> ThrowsError Exp
-readExp input = case parse parseExp "gst" input of
+readOrThrow :: Parser a -> String -> ThrowsError a
+readOrThrow parser input = case parse parser "gst" input of
     Left err -> throwError $ Parser err
     Right exp -> return exp
+
+readExp = readOrThrow parseExp
+readExpList = readOrThrow (endBy parseExp (char '\n'))
 
 parseExpr = try parseZ
     <|> try parseS
@@ -47,7 +50,16 @@ parseExpr = try parseZ
     <|> parseParenE
     <|> parseVar
 
-parseExp = try parseSet <|> parseAp
+parseExp = try parseLoad <|> try parseSet <|> parseAp
+
+parseLoad :: Parser Exp
+parseLoad = do
+    string "load"
+    many1 sspace
+    char '\"'
+    f <- many1 (satisfy (/= '\"'))
+    char '\"'
+    return $ Load f
 
 parseAp :: Parser Exp
 parseAp = do 
