@@ -37,8 +37,8 @@ of Control.Monad.Error, then use the command `ghc --make -hide-package monads-fd
 
 ## ToDo
 
-- Refactor error handling in GstEval.hs to use MonadError
+- <s>Refactor error handling in GstEval.hs to use MonadError</s>
 
-- Implement a global variable environment using Data.IORef
+- <s>Implement a global variable environment using Data.IORef</s>
 
 - Implement File IO to allow the loading of *.gst files into the interpreter
