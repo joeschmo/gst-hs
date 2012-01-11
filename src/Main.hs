@@ -11,6 +11,7 @@ import GstParser
 import GstEval
 import GstTypes
 import GstError
+import GstEnv
 
 
 flushStr str = putStr str >> hFlush stdout
@@ -27,20 +28,18 @@ until_ prompt action = do
                                  action line
     until_ prompt action
 
-runRepl = until_ (readPrompt "gst>>> ") evalAndPrint
+runRepl = nullEnv >>= until_ (readPrompt "gst>>> ") . evalAndPrint
 
 readPrompt prompt = hFlush stdout >> readline prompt
 
-evalString :: String -> IO String
-evalString expr = return $ extractVal $ trapError 
-    (do
-        exp <- readExp expr
-        t <- typeof emptyCtx exp
-        e <- eval exp
-        return $ (show e) ++ " : " ++ (show t))
+evalString :: Env -> String -> IO String
+evalString env expr = runIOThrows $ liftM show $ (liftThrows $ readExp expr) >>= eval env
 
-evalAndPrint :: String -> IO ()
-evalAndPrint expr = evalString expr >>= putStrLn
+evalAndPrint :: Env -> String -> IO ()
+evalAndPrint env expr = evalString env expr >>= putStrLn
+
+runOne :: String -> IO ()
+runOne expr = nullEnv >>= flip evalAndPrint expr
 
 main :: IO ()
 main = runRepl

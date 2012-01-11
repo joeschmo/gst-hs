@@ -47,12 +47,23 @@ parseExpr = try parseZ
     <|> parseParenE
     <|> parseVar
 
-parseExp :: Parser Exp
-parseExp = do 
+parseExp = try parseSet <|> parseAp
+
+parseAp :: Parser Exp
+parseAp = do 
     e1 <- parseExpr
     many sspace
     es <- sepBy parseParenE (many sspace)
     return $ foldr (\e -> (\e' -> Ap e' e)) e1 (reverse es)
+
+parseSet :: Parser Exp
+parseSet = do
+    v <- parseVarname
+    many sspace
+    char '='
+    many sspace
+    e <- parseAp
+    return $ Set v e
 
 parseParenE :: Parser Exp
 parseParenE = do

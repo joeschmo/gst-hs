@@ -1,49 +1,52 @@
 module GstEval where
 
 import Control.Monad.Error
+
 import GstError
 import GstTypes
+import GstEnv
 
 -- STATICS
 
-typeof :: Ctx -> Exp -> ThrowsError Typ
-typeof cx ex =
+typeof :: Env -> Ctx -> Exp -> IOThrowsError Typ
+typeof env cx ex =
     case ex of
          Z -> return Nat
          S e ->
-            typeof cx e >>= (\t ->
+            typeof env cx e >>= (\t ->
                 case t of
                      Nat -> return Nat
                      _   -> throwError $ TypeMismatch Nat t ex)
          X v ->
             case lookup v cx of
-                 Nothing -> throwError $ UnboundVar "Unbound variable " v
+                 Nothing -> getVar env v >>= typeof env cx
                  Just t  -> return t
          Lam t v e ->
             let
                 cx' = (v, t) : cx
             in
-                typeof cx' e >>= (\t' -> return $ Arr t t')
+                typeof env cx' e >>= (\t' -> return $ Arr t t')
          Natrec e e0 x y e1 ->
             do
-                et <- typeof cx e
+                et <- typeof env cx e
                 case et == Nat of
                      False -> throwError $ TypeMismatch Nat et e
                      True  ->
-                        typeof cx e0 >>= (\t ->
+                        typeof env cx e0 >>= (\t ->
                             let
                                 cx' = (x, Nat) : (y, t) : cx
                             in
-                                typeof cx' e1)
+                                typeof env cx' e1)
          Ap e1 e2 ->
             do
-                et <- typeof cx e1
+                et <- typeof env cx e1
                 case et of
                      Arr t2 t ->
-                        typeof cx e2 >>= (\t0 ->
+                        typeof env cx e2 >>= (\t0 ->
                             if t0 == t2 then return t
                             else throwError $ TypeMismatch t2 t0 e2)
                      _ -> throwError $ Default "Application expected a function"
+         Set v e -> typeof env cx e
 
 -- DYNAMICS
 
@@ -82,36 +85,41 @@ rebindVar v ex r =
                          False ->
                             Natrec (rebindVar v e r) (rebindVar v e0 r) x y (rebindVar v e1 r)
 
-eval :: Exp -> ThrowsError Exp
-eval ex =
+eval :: Env -> Exp -> IOThrowsError Exp
+eval env ex =
     case ex of
          Z -> return Z
-         S e -> eval e >>= (\e' -> return $ S e')
-         X v -> throwError $ UnboundVar "Unbound Variable" v
+         S e -> eval env e >>= (\e' -> return $ S e')
+         X v -> getVar env v 
          Lam t v e -> return ex
          Ap e1 e2 ->
             do
-                e1' <- eval e1
+                e1' <- eval env e1
                 case e1' of
                      Lam t v e ->
                         let
                             e' = rebindVar v e e2
                         in
-                            eval e'
+                            eval env e'
                      _ -> throwError $ Default "Application expected a function"
          Natrec e e0 x y e1 ->
             do
-                e' <- eval e
+                e' <- eval env e
                 case e' of
-                     Z -> eval e0
+                     Z -> eval env e0
                      S ep ->
                         let
                             repX = rebindVar x e1 ep
                             repY = rebindVar y repX (Natrec ep e0 x y e1)
                         in
-                            eval repY
-                     _ -> typeof emptyCtx e' >>= (\t -> throwError $ TypeMismatch Nat t e')
+                            eval env repY
+                     _ -> typeof env emptyCtx e' >>= (\t -> throwError $ TypeMismatch Nat t e')
+         Set v e -> do
+            e' <- eval env e
+            defineVar env v e'
+            return $ Set v e'
 
+{-
 evalWith :: Exp -> IO ()
 evalWith ex =
     case typeof emptyCtx ex of
@@ -119,4 +127,4 @@ evalWith ex =
          Right t  ->
             case eval ex of
                  Left err' -> putStrLn $ show err'
-                 Right e   -> putStrLn $ show e ++ " : " ++ show t
+                 Right e   -> putStrLn $ show e ++ " : " ++ show t -}

@@ -14,6 +14,7 @@ showError (TypeMismatch t1 t2 e) = "Invalid type: expected "++(show t1)
                                     ++" instead found "++(show t2)++" in "++(show e)
 showError (Parser err) = "Parse error at " ++ show err
 showError (UnboundVar message var) = message ++ ": " ++ var
+showError (Default s) = s
 
 instance Show GstError where show = showError
 

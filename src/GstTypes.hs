@@ -11,6 +11,7 @@ data Exp = X Var
          | Natrec Exp Exp Var Var Exp
          | Lam Typ Var Exp
          | Ap Exp Exp
+         | Set Var Exp
     deriving (Eq)
 
 type Ctx = [(Var, Typ)]
@@ -32,3 +33,4 @@ instance Show Exp where
         "natrec "++(show e)++" {z => "++(show e0)++" | s("++x++") with "++y++" => "++(show e1)++"}"
     show (Lam t v e) = "fn("++v++" : "++(show t)++") "++(show e)
     show (Ap e1 e2) = (show e1)++"("++(show e2)++")"
+    show (Set v e) = v++" = "++(show e)
