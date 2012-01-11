@@ -56,9 +56,6 @@ that the filename ends with the .gst extension.
 
 ## Known Bugs
 
-- do not have variable names that start with the letter `z`. Unfortunately the parser will consume
-  the `z` and believe it has found the expression for zero.
-
 - when using `natrec e {z => e0 | s(x) with y => e1}`, if `e1` is a multiple argument function being
   applied on `y` and `x` (or `s(x)`), try to make it such that `y` is applied before `x`. Some of the
   local variable binding logic may be slightly off, and so `natrec` can give incorrect results

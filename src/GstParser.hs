@@ -43,10 +43,10 @@ readOrThrow parser input = case parse parser "gst" input of
 readExp = readOrThrow parseExp
 readExpList = readOrThrow (endBy parseExp (many1 $ char '\n'))
 
-parseExpr = try parseZ
-    <|> try parseS
+parseExpr = try parseS
     <|> try parseLam
     <|> try parseNatrec
+    <|> try parseZ
     <|> parseParenE
     <|> parseVar
 
@@ -87,7 +87,13 @@ parseParenE = do
     return e
 
 parseZ :: Parser Exp
-parseZ = char 'z' >> return Z
+parseZ = do
+    z <- parseVarname
+    if length z == 1 then
+        (case head z == 'z' of
+              True  -> return Z
+              False -> return $ X z)
+    else return $ X z
 
 parseS :: Parser Exp
 parseS = do
