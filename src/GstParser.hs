@@ -41,7 +41,7 @@ readOrThrow parser input = case parse parser "gst" input of
     Right exp -> return exp
 
 readExp = readOrThrow parseExp
-readExpList = readOrThrow (endBy parseExp (char '\n'))
+readExpList = readOrThrow (endBy parseExp (many1 $ char '\n'))
 
 parseExpr = try parseZ
     <|> try parseS
