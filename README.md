@@ -54,6 +54,11 @@ load the file with the given filename. The interpreter executes each line in the
 remembers variable assignments done in the source file. While any filename will do, it is preferred
 that the filename ends with the .gst extension.
 
+## Known Bugs
+
+- do not have variable names that start with the letter `z`. Unfortunately the parser will consume
+  the `z` and believed it has found the expression for zero.
+
 ## ToDo
 
 - Perhaps a tutorial?
