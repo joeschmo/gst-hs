@@ -81,7 +81,7 @@ rebindVar v ex r =
             case x == v of
                  True ->
                     let
-                        nat' = Natrec e e0 (x++"#") y (rebindVar x e (X (x++"#")))
+                        nat' = Natrec e e0 (x++"#") y (rebindVar x e1 (X (x++"#")))
                     in
                         rebindVar v nat' r
                  False ->
