@@ -54,13 +54,6 @@ load the file with the given filename. The interpreter executes each line in the
 remembers variable assignments done in the source file. While any filename will do, it is preferred
 that the filename ends with the .gst extension.
 
-## Known Bugs
-
-- when using `natrec e {z => e0 | s(x) with y => e1}`, if `e1` is a multiple argument function being
-  applied on `y` and `x` (or `s(x)`), try to make it such that `y` is applied before `x`. Some of the
-  local variable binding logic may be slightly off, and so `natrec` can give incorrect results
-  when `x` is applied before `y`.
-
 ## ToDo
 
 - Perhaps a tutorial?

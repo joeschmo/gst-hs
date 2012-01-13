@@ -39,7 +39,12 @@ typeof env cx ex =
                             let
                                 cx' = (x, Nat) : (y, t) : cx
                             in
-                                typeof env cx' e1)
+                                do
+                                    t' <- typeof env cx' e1
+                                    case t == t' of
+                                         True -> return t
+                                         False ->
+                                            throwError $ TypeMismatch t t' e1)
          Ap e1 e2 ->
             do
                 et <- typeof env cx e1
@@ -83,7 +88,7 @@ rebindVar v ex r =
                     case y == v of
                          True ->
                             let
-                                nat' = Natrec e e0 x (y++"#") (rebindVar y e (X (y++"#")))
+                                nat' = Natrec e e0 x (y++"#") (rebindVar y e1 (X (y++"#")))
                             in
                                 rebindVar v nat' r
                          False ->
