@@ -7,7 +7,7 @@ haskell programming language.
 
 For a technical understanding of the semantics of Godel's System T, read Chapter 9 of 
 [Bob Harper's book](www.cs.cmu.edu/~rwh/plbook/book.pdf). For a more basic tutorial, go to the
-section **Basic Tutorial to Godel's System T**.
+examples folder and read the tutorial there.
 
 ## Compiling
 

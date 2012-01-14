@@ -109,10 +109,11 @@ eval env ex =
          Ap e1 e2 ->
             do
                 e1' <- eval env e1
+                e2' <- eval env e2
                 case e1' of
                      Lam t v e ->
                         let
-                            e' = rebindVar v e e2
+                            e' = rebindVar v e e2'
                         in
                             eval env e'
                      _ -> throwError $ Default "Application expected a function"
