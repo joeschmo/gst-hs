@@ -1,5 +1,4 @@
 module Main where
-import System
 import System.Console.Readline
 import System.Exit
 import System.IO
